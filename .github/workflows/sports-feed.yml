@@ -1,0 +1,73 @@
+name: sports-feed
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'        # كل 5 دقائق — أغلب التشغيلات لا تستهلك أي طلب
+  workflow_dispatch:
+    inputs:
+      test_notify:
+        description: 'إرسال إشعار تجريبي لحساب المشرف (topic: admins)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sports-feed
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    outputs:
+      changed: ${{ steps.run.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # الحالة + الشعارات تُحفظ بين التشغيلات
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: feed-data-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: feed-data-
+
+      - id: run
+        run: node scripts/update.mjs
+        env:
+          API_FOOTBALL_KEY:    ${{ secrets.API_FOOTBALL_KEY }}
+          GEMINI_API_KEY:      ${{ secrets.GEMINI_API_KEY }}
+          FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
+          FEED_URL:            ${{ vars.FEED_URL }}
+          TEST_NOTIFY:         ${{ inputs.test_notify }}
+
+      # GitHub يوقف الجدولة بعد 60 يوماً بلا نشاط — commit صغير كل 25 يوماً يمنع ذلك
+      - if: steps.run.outputs.keepalive == 'true'
+        run: |
+          date -u > .keepalive
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .keepalive && git commit -m "keepalive" && git push || true
+
+      - if: steps.run.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.dep.outputs.page_url }}
+    steps:
+      - id: dep
+        uses: actions/deploy-pages@v4

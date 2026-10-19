@@ -1,0 +1,157 @@
+{
+  "_readme": "إعدادات خلاصة المباريات — عدّلها من GitHub مباشرة. لا تضع أي مفتاح سري هنا.",
+  "timezone": "Asia/Baghdad",
+  "dailyBudget": 100,
+  "safetyReserve": 6,
+  "maxNotificationsPerDay": 40,
+  "importanceThreshold": 13,
+  "notifyTopic": "matches",
+  "geminiModel": "gemini-2.5-flash-lite",
+  "leagues": [
+    {
+      "id": 2,
+      "ar": "دوري أبطال أوروبا",
+      "weight": 10,
+      "order": 1,
+      "color": "#0B1F63"
+    },
+    {
+      "id": 4,
+      "ar": "كأس أمم أوروبا",
+      "weight": 13,
+      "order": 2,
+      "color": "#143C8C"
+    },
+    {
+      "id": 7,
+      "ar": "كأس آسيا",
+      "weight": 13,
+      "order": 3,
+      "color": "#7A1630"
+    },
+    {
+      "id": 39,
+      "ar": "الدوري الإنجليزي الممتاز",
+      "weight": 8,
+      "order": 4,
+      "color": "#3D0A4F"
+    },
+    {
+      "id": 140,
+      "ar": "الدوري الإسباني",
+      "weight": 8,
+      "order": 5,
+      "color": "#C8102E"
+    },
+    {
+      "id": 135,
+      "ar": "الدوري الإيطالي",
+      "weight": 6,
+      "order": 6,
+      "color": "#0B3D91"
+    },
+    {
+      "id": 78,
+      "ar": "الدوري الألماني",
+      "weight": 6,
+      "order": 7,
+      "color": "#B5121B"
+    },
+    {
+      "id": 61,
+      "ar": "الدوري الفرنسي",
+      "weight": 5,
+      "order": 8,
+      "color": "#0D1B4C"
+    }
+  ],
+  "bigTeams": [
+    "Real Madrid",
+    "Barcelona",
+    "Atletico Madrid",
+    "Manchester City",
+    "Manchester United",
+    "Liverpool",
+    "Arsenal",
+    "Chelsea",
+    "Tottenham",
+    "Bayern München",
+    "Bayern Munich",
+    "Borussia Dortmund",
+    "Juventus",
+    "Inter",
+    "AC Milan",
+    "Napoli",
+    "Paris Saint Germain",
+    "Iraq",
+    "Saudi Arabia",
+    "Spain",
+    "France",
+    "England",
+    "Germany",
+    "Portugal",
+    "Italy",
+    "Japan",
+    "Korea Republic"
+  ],
+  "_channels": "كلمات البحث عن القناة الناقلة في سيرفرك حسب الدوري — الأولى لها الأفضلية. default تُستخدم لأي دوري غير مذكور.",
+  "channels": {
+    "2": [
+      "bein sports 1",
+      "bein sports 2",
+      "bein sports premium",
+      "bein sports"
+    ],
+    "4": [
+      "bein sports 1",
+      "bein sports 2",
+      "bein sports"
+    ],
+    "7": [
+      "bein sports 1",
+      "bein sports 2",
+      "bein sports"
+    ],
+    "39": [
+      "bein sports premium 1",
+      "bein sports premium 2",
+      "bein sports premium 3",
+      "bein premium",
+      "bein sports"
+    ],
+    "140": [
+      "bein sports 1",
+      "bein sports 2",
+      "bein sports 3",
+      "bein sports"
+    ],
+    "135": [
+      "bein sports 3",
+      "bein sports 4",
+      "bein sports"
+    ],
+    "78": [
+      "bein sports 5",
+      "bein sports 6",
+      "bein sports"
+    ],
+    "61": [
+      "bein sports 6",
+      "bein sports 7",
+      "bein sports"
+    ],
+    "default": [
+      "bein sports"
+    ]
+  },
+  "_overrides": "قناة محدّدة لمباراة بعينها: رقم المباراة (fixture id) ← اسم القناة كما في سيرفرك. اختياري.",
+  "overrides": {},
+  "_notify": "إشعار «صافرة البداية» لكل مباراة عند انطلاقها. المباريات المتزامنة (3+) تُجمع في إشعار واحد.",
+  "refresh": {
+    "weekHours": 6,
+    "todayHours": 4,
+    "tomorrowHours": 12,
+    "otherDaysHours": 24
+  },
+  "_promos": "ضع صور إعلانات المباريات في مجلد promos بالاسم: 2026-10-20_21-45_ريال-مدريد-برشلونة.jpg (التاريخ_الساعة-الدقيقة بتوقيت بغداد_عنوان اختياري)"
+}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOTV+ Sports Feed</title>
+<style>
+  :root{--bg:#000;--card:#111114;--line:#26262b;--txt:#fff;--dim:#9a9aa3;--ok:#22c55e;--bad:#ef4444;--gold:#F5A623}
+  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,"Segoe UI",Tahoma,sans-serif;padding:20px 16px}
+  h1{font-size:20px;margin:0 0 4px} p{color:var(--dim);margin:0 0 18px}
+  .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;max-width:760px}
+  .c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .c b{display:block;font-size:22px} .c span{color:var(--dim);font-size:13px}
+  .err{margin-top:12px;max-width:760px;color:var(--bad);white-space:pre-wrap}
+  table{margin-top:18px;border-collapse:collapse;width:100%;max-width:760px}
+  td{border-bottom:1px solid var(--line);padding:8px 6px;font-size:14px} td.t{color:var(--dim);white-space:nowrap}
+  .live{color:var(--bad);font-weight:700} .imp{color:var(--gold)}
+</style>
+</head>
+<body>
+<h1>خلاصة مباريات TOTV+</h1>
+<p id="up">جارٍ التحميل…</p>
+<div class="g" id="g"></div>
+<div class="err" id="err"></div>
+<table id="tb"></table>
+<script>
+const f=n=>n==null?'—':n;
+Promise.all([fetch('status.json?'+Date.now()).then(r=>r.json()),fetch('matches.json?'+Date.now()).then(r=>r.json())]).then(([s,m])=>{
+  const ago=Math.round((Date.now()/1000-s.updated)/60);
+  document.getElementById('up').textContent='آخر تحديث قبل '+ago+' دقيقة';
+  const cards=[['طلبات اليوم',s.used+' / 100'],['المتبقي حسب الخادم',f(s.remaining)],['مباريات اليوم',s.today],['جارية الآن',s.liveNow],['فاصل التحديث',s.intervalMin+' د'],['إشعارات اليوم',s.notifiedToday],['طلبات الذكاء',s.ai]];
+  document.getElementById('g').innerHTML=cards.map(([a,b])=>'<div class="c"><b>'+b+'</b><span>'+a+'</span></div>').join('');
+  if(s.lastError) document.getElementById('err').textContent='آخر خطأ من API-Football: '+s.lastError;
+  const fmt=new Intl.DateTimeFormat('ar-IQ',{timeZone:m.tz,weekday:'short',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('tb').innerHTML=m.matches.map(x=>{
+    const live=['1H','HT','2H','ET','P','BT','LIVE'].includes(x.st);
+    const sc=x.gh==null?'':' '+x.gh+' - '+x.ga;
+    return '<tr><td class="t">'+fmt.format(new Date(x.ts*1000))+'</td><td>'+(m.leagues[x.lg]||{}).ar+'</td><td'+(x.imp?' class="imp"':'')+'>'+(x.h.ar||x.h.n)+' × '+(x.a.ar||x.a.n)+'</td><td'+(live?' class="live"':'')+'>'+x.st+sc+'</td></tr>';
+  }).join('');
+}).catch(e=>{document.getElementById('up').textContent='لم يُنشر شيء بعد — شغّل الـ workflow مرة واحدة.'});
+</script>
+</body>
+</html>

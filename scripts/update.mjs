@@ -135,16 +135,18 @@ const rangeErr = e => /season|league|from|to|date|required|parameter/i.test(JSON
 // الخطة المجانية في API-Football لا تسمح إلا بثلاثة أيام: أمس واليوم والغد.
 // عند ظهور رسالة «Free plans do not have access to this date» نحفظ النافذة المسموحة
 // ولا نطلب أي يوم خارجها (كل طلب فاشل يُخصم من الـ100 اليومية).
+state.window = null;
 const freeErr = e => /free plans? do not have access/i.test(JSON.stringify(e || ''));
 const learnWindow = e => {
   const m = JSON.stringify(e || '').match(/from (\d{4}-\d{2}-\d{2}) to (\d{4}-\d{2}-\d{2})/);
   state.freePlan = true; state.freeAt = NOW;
-  if (m) state.window = { from: m[1], to: m[2] };
+  if (m) state.window = null;   // لا نحفظها — تتغيّر كل يوم
 };
 // يُعاد اختبار الأيام البعيدة مرة أسبوعياً (لو رُقّيت الخطة)
 if (state.freePlan && NOW - (state.freeAt || 0) > 7 * 864e5) { state.freePlan = false; state.window = null; }
-const allowed = d => !state.freePlan || (d >= (state.window?.from || YESTERDAY) && d <= (state.window?.to || TOMORROW)
-                                            && d >= YESTERDAY && d <= TOMORROW);
+// ★ النافذة نسبية دائماً (أمس → الغد) — لا نعتمد التواريخ المحفوظة في رسالة الخطأ
+//   (كانت تُحفظ ثابتة فتمنع جلب أي يوم جديد بعد مرور يومين ⇐ جدول فارغ)
+const allowed = d => !state.freePlan || (d >= YESTERDAY && d <= TOMORROW);
 
 if (!state.freePlan && !state.rangeBad && (stale(TODAY, R.weekHours) || DAYS.some(d => !state.sched[d]))) {
   // طلب واحد لكل الأسبوع وكل الدوريات
@@ -445,7 +447,11 @@ async function composeKickoff(group) {
   const [H, A] = names(top);
   const L = LEAGUES.get(top.lg)?.ar || '';
   if (group.length === 1) {
-    const fallback = { title: `🔔 صافرة البداية! ${H} × ${A}`, body: `${L} — انطلقت المباراة الآن، تابعها مباشرة على TOTV+ ⚽🔥` };
+    const late = Math.floor((nowS - top.ts) / 60);
+    const fallback = late >= 8
+      ? { title: `⚽ ${H} × ${A} — مباشر الآن`, body: `${L} — المباراة جارية منذ ${late} دقيقة، الحق بها على TOTV+ 🔥` }
+      : { title: `🔔 صافرة البداية! ${H} × ${A}`, body: `${L} — انطلقت المباراة الآن، تابعها مباشرة على TOTV+ ⚽🔥` };
+    if (late >= 8) return fallback;
     const ai = await gemini(
       'أنت معلّق ومحرر إشعارات لتطبيق بث رياضي عربي اسمه TOTV+. صافرة البداية انطلقت للتو. ' +
       'اكتب إشعاراً حماسياً قصيراً بروح المعلّق العربي.\n' +
@@ -467,9 +473,12 @@ if (TEST) {
     { type: 'match' }, sample && FEED ? `${FEED}/posters/m${sample.id}.png` : '');
 }
 
-// المباريات التي انطلقت للتو (قبل دقيقة حتى 20 دقيقة — لتأخّر جدولة GitHub)
+// المباريات التي انطلقت للتو (قبل 3 دقائق حتى 40 دقيقة)
+// ★ جدولة GitHub «كل 5 دقائق» تتأخر كثيراً وقت الذروة (مباريات الساعة 10 مساءً)
+//   حتى 20–30 دقيقة، فكانت النافذة القديمة (20 د) تُفوّت الإشعار كلياً.
 const due = [...byId.values()].filter(m => !state.notified[m.id] && !OFF.has(m.st)
-  && dayOf(m.ts * 1000) === TODAY && nowS >= m.ts - 60 && nowS <= m.ts + 20 * 60);
+  && dayOf(m.ts * 1000) === TODAY && nowS >= m.ts - 180 && nowS <= m.ts + 40 * 60);
+if (!SA && due.length) log(`⚠️ ${due.length} مباراة انطلقت لكن FCM_SERVICE_ACCOUNT غير موجود في Secrets — لا إشعار`);
 const groups = new Map();
 for (const m of due) { const k = m.ts; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(m); }
 for (const g of groups.values()) {
@@ -543,7 +552,7 @@ if (changed) {
   // لا ننشر إعلانات منتهية
   const live = new Set(promos.map(p => p.img.split('/')[1]));
   if (fs.existsSync(`${OUT}/promos`)) for (const f of fs.readdirSync(`${OUT}/promos`)) if (!live.has(f)) fs.rmSync(`${OUT}/promos/${f}`);
-  fs.copyFileSync('scripts/status.html', `${OUT}/index.html`);
+  if (fs.existsSync('scripts/status.html')) fs.copyFileSync('scripts/status.html', `${OUT}/index.html`);
   fs.writeFileSync(`${OUT}/.nojekyll`, '');
 }
 

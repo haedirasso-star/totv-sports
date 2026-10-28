@@ -2,7 +2,7 @@ name: reel-encode
 
 # ════════════════════════════════════════════════════════════════════
 #  ضغط فيديوهات الريلز والإعلانات (يُشغَّل تلقائياً من دالة push بعد كل رفع)
-#  الأصلي من R2 (raw/...) ⇐ ffmpeg: H.264 بدقة 540p (عمودي 540×960) ~1.2Mbps + صوت 96k
+#  الأصلي من R2 (raw/...) ⇐ ffmpeg: H.264 بدقة 720p (عمودي 720×1280) ~2.5Mbps + صوت 128k
 #  ⇐ media/reels/<id>.mp4 + غلاف .jpg على R2 ⇐ إبلاغ الدالة فتنشر القائمة.
 #  الفيديو يصغر عادة 4–8 مرات ⇐ استهلاك أقل للمستخدم وتشغيل فوري.
 #
@@ -57,13 +57,13 @@ jobs:
         run: |
           EP="https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
           aws s3 cp "s3://$R2_BUCKET/$RAW" in.bin --endpoint-url "$EP" --only-show-errors
-          # 540p: العمودي عرضه 540، الأفقي ارتفاعه 540 · 30 إطاراً كحد أقصى · حتى 5 دقائق
+          # 720p: العمودي عرضه 720 (720×1280)، الأفقي ارتفاعه 720 · 30 إطاراً كحد أقصى · حتى 5 دقائق
           ffmpeg -hide_banner -loglevel error -y -i in.bin -t 300 \
-            -vf "scale='if(gt(iw,ih),-2,min(540,iw))':'if(gt(iw,ih),min(540,ih),-2)':flags=lanczos,fps=fps='min(30,source_fps)'" \
-            -c:v libx264 -preset veryfast -crf 26 -maxrate 1400k -bufsize 2800k -profile:v main -pix_fmt yuv420p \
-            -c:a aac -b:a 96k -ac 2 -movflags +faststart out.mp4
-          ffmpeg -hide_banner -loglevel error -y -ss 1 -i out.mp4 -frames:v 1 -q:v 4 poster.jpg \
-            || ffmpeg -hide_banner -loglevel error -y -i out.mp4 -frames:v 1 -q:v 4 poster.jpg
+            -vf "scale='if(gt(iw,ih),-2,min(720,iw))':'if(gt(iw,ih),min(720,ih),-2)':flags=lanczos,fps=fps='min(30,source_fps)'" \
+            -c:v libx264 -preset fast -crf 22 -maxrate 2800k -bufsize 5600k -profile:v high -pix_fmt yuv420p \
+            -c:a aac -b:a 128k -ac 2 -movflags +faststart out.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 1 -i out.mp4 -frames:v 1 -q:v 3 poster.jpg \
+            || ffmpeg -hide_banner -loglevel error -y -i out.mp4 -frames:v 1 -q:v 3 poster.jpg
           LEN=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out.mp4 | cut -d. -f1)
           SIZE=$(stat -c %s out.mp4)
           echo "LEN=${LEN:-0}" >> "$GITHUB_ENV"; echo "SIZE=$SIZE" >> "$GITHUB_ENV"

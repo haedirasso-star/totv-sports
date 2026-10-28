@@ -3,6 +3,8 @@ name: sports-feed
 on:
   schedule:
     - cron: '*/5 * * * *'        # كل 5 دقائق — أغلب التشغيلات لا تستهلك أي طلب
+  repository_dispatch:
+    types: [catalog-refresh]       # ★ بعد أن يرفع هاتف الإدارة قوائم السيرفر ⇐ خلفيات TMDB + صور
   workflow_dispatch:
     inputs:
       test_notify:
@@ -55,7 +57,8 @@ jobs:
           XTREAM_USER:   ${{ secrets.XTREAM_USER }}
           XTREAM_PASS:   ${{ secrets.XTREAM_PASS }}
           TMDB_KEY:      ${{ secrets.TMDB_KEY }}
-          CATALOG_FORCE: ${{ inputs.refresh_catalog }}
+          CATALOG_FORCE: ${{ inputs.refresh_catalog || github.event_name == 'repository_dispatch' }}
+          CDN_BASE:      ${{ vars.CDN_BASE || 'https://cdn.totv.app' }}
 
       - id: run
         run: node scripts/update.mjs

@@ -33,7 +33,9 @@ const log = (...a) => console.log('[catalog]', ...a);
 const readJson = (p, d) => { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return d; } };
 const writeJson = (p, o) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(o)); };
 
-if (!HOST || !USER || !PASS) { log('لا توجد أسرار XTREAM_* — تخطٍّ'); process.exit(0); }
+// ★ v3.6.1: السيرفر يحجب خوادم GitHub (403) ⇐ المصدر الاحتياطي: النسخة الخام التي يرفعها هاتف الإدارة
+const CDN = (process.env.CDN_BASE || '').trim().replace(/\/+$/, '');
+if ((!HOST || !USER || !PASS) && !CDN) { log('لا مصدر للقوائم (XTREAM_* أو CDN_BASE) — تخطٍّ'); process.exit(0); }
 const st = readJson(`${DATA}/catalog_state.json`, {});
 if (!FORCE && st.at && Date.now() - st.at < EVERY_H * 3600e3) { log('حديث — لا حاجة للتحديث'); process.exit(0); }
 
@@ -54,13 +56,36 @@ const pick = (o, keys) => { const x = {}; for (const k of keys) if (o[k] !== und
 const ADULT = /(xxx|adult|\+18|18\+|porn)/i;
 
 let live, vod, series, lc, vc, sc;
-try {
+async function fromXtream() {
   [lc, vc, sc] = await Promise.all([api('get_live_categories', 30000), api('get_vod_categories', 30000), api('get_series_categories', 30000)]);
   [live, vod, series] = await Promise.all([api('get_live_streams'), api('get_vod_streams'), api('get_series')]);
+}
+async function fromRaw() {
+  const get = async (f) => {
+    const r = await fetch(`${CDN}/catalog/raw/${f}?b=${Date.now()}`);
+    if (!r.ok) throw new Error(`raw/${f} HTTP ${r.status}`);
+    return r.json();
+  };
+  const [m, s2, l, c] = await Promise.all([get('movies.json'), get('series.json'), get('live.json'), get('cats.json')]);
+  if (!Array.isArray(m) || !Array.isArray(s2)) throw new Error('raw: ليست قوائم');
+  vod = m; series = s2; live = Array.isArray(l) ? l : [];
+  lc = c.live || []; vc = c.movie || []; sc = c.series || [];
+}
+try {
+  if (!HOST || !USER || !PASS) throw new Error('no xtream secrets');
+  await fromXtream();
+  log('المصدر: سيرفر Xtream');
 } catch (e) {
-  log('فشل الجلب — نُبقي النسخة السابقة:', e.message);
-  writeJson(`${DATA}/catalog_state.json`, { ...st, lastError: String(e.message), errorAt: Date.now() });
-  process.exit(0);
+  log('السيرفر غير متاح من هنا:', e.message, '— نجرب النسخة الخام من هاتف الإدارة');
+  try {
+    if (!CDN) throw new Error('CDN_BASE غير مضبوط');
+    await fromRaw();
+    log('المصدر: catalog/raw على موقعنا');
+  } catch (e2) {
+    log('فشل الجلب — نُبقي النسخة السابقة:', e2.message);
+    writeJson(`${DATA}/catalog_state.json`, { ...st, lastError: String(e2.message), errorAt: Date.now() });
+    process.exit(0);
+  }
 }
 
 const badCat = new Set([...lc, ...vc, ...sc].filter(c => ADULT.test(c.category_name || '')).map(c => String(c.category_id)));

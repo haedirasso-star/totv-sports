@@ -1,0 +1,80 @@
+name: reel-encode
+
+# ════════════════════════════════════════════════════════════════════
+#  ضغط فيديوهات الريلز والإعلانات (يُشغَّل تلقائياً من دالة push بعد كل رفع)
+#  الأصلي من R2 (raw/...) ⇐ ffmpeg: H.264 بدقة 540p (عمودي 540×960) ~1.2Mbps + صوت 96k
+#  ⇐ media/reels/<id>.mp4 + غلاف .jpg على R2 ⇐ إبلاغ الدالة فتنشر القائمة.
+#  الفيديو يصغر عادة 4–8 مرات ⇐ استهلاك أقل للمستخدم وتشغيل فوري.
+#
+#  الأسرار: R2_ACCOUNT_ID · R2_ACCESS_KEY_ID · R2_SECRET_ACCESS_KEY · R2_BUCKET · ENCODE_SECRET
+#  (اختياري) PUSH_URL — افتراضياً دالة push في مشروع Supabase الخاص بـ TOTV+
+# ════════════════════════════════════════════════════════════════════
+on:
+  repository_dispatch:
+    types: [reel-encode]
+  workflow_dispatch:
+    inputs:
+      id:  { description: 'معرّف الريل', required: true }
+      raw: { description: 'مسار الملف الأصلي في R2 (raw/…)', required: true }
+
+concurrency:
+  group: reel-${{ github.event.client_payload.id || inputs.id }}
+  cancel-in-progress: false
+
+jobs:
+  encode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ID:  ${{ github.event.client_payload.id || inputs.id }}
+      RAW: ${{ github.event.client_payload.raw || inputs.raw }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      ENCODE_SECRET: ${{ secrets.ENCODE_SECRET }}
+      PUSH_URL: ${{ secrets.PUSH_URL || 'https://hlmaksidfqdarwunedqj.supabase.co/functions/v1/push' }}
+    steps:
+      - name: Validate
+        run: |
+          [[ "$ID" =~ ^[A-Za-z0-9_-]{4,40}$ ]] || { echo "::error::معرّف غير صالح"; exit 1; }
+          [[ "$RAW" =~ ^raw/[A-Za-z0-9_-]+\.[a-z0-9]{2,5}$ ]] || { echo "::error::مسار غير صالح"; exit 1; }
+
+      - name: FFmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+
+      - name: Encode
+        run: |
+          EP="https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+          aws s3 cp "s3://$R2_BUCKET/$RAW" in.bin --endpoint-url "$EP" --only-show-errors
+          # 540p: العمودي عرضه 540، الأفقي ارتفاعه 540 · 30 إطاراً كحد أقصى · حتى 5 دقائق
+          ffmpeg -hide_banner -loglevel error -y -i in.bin -t 300 \
+            -vf "scale='if(gt(iw,ih),-2,min(540,iw))':'if(gt(iw,ih),min(540,ih),-2)':flags=lanczos,fps=fps='min(30,source_fps)'" \
+            -c:v libx264 -preset medium -crf 26 -maxrate 1400k -bufsize 2800k -profile:v main -pix_fmt yuv420p \
+            -c:a aac -b:a 96k -ac 2 -movflags +faststart out.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 1 -i out.mp4 -frames:v 1 -q:v 4 poster.jpg \
+            || ffmpeg -hide_banner -loglevel error -y -i out.mp4 -frames:v 1 -q:v 4 poster.jpg
+          LEN=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out.mp4 | cut -d. -f1)
+          SIZE=$(stat -c %s out.mp4)
+          echo "LEN=${LEN:-0}" >> "$GITHUB_ENV"; echo "SIZE=$SIZE" >> "$GITHUB_ENV"
+          echo "الأصلي: $(stat -c %s in.bin) بايت ⇐ المضغوط: $SIZE بايت · ${LEN}s"
+          aws s3 cp out.mp4 "s3://$R2_BUCKET/media/reels/$ID.mp4" --endpoint-url "$EP" --only-show-errors \
+            --content-type video/mp4 --cache-control "public, max-age=31536000, immutable"
+          aws s3 cp poster.jpg "s3://$R2_BUCKET/media/reels/$ID.jpg" --endpoint-url "$EP" --only-show-errors \
+            --content-type image/jpeg --cache-control "public, max-age=31536000, immutable"
+
+      - name: Report
+        run: |
+          jq -n --arg s "$ENCODE_SECRET" --arg id "$ID" --argjson len "${LEN:-0}" --argjson size "${SIZE:-0}" \
+            '{action:"encode_done", secret:$s, id:$id, ok:true, video_key:("media/reels/"+$id+".mp4"),
+              poster_key:("media/reels/"+$id+".jpg"), length:$len, size:$size}' \
+          | curl -sf -X POST "$PUSH_URL" -H "Content-Type: application/json" -d @- && echo "✓ نُشر"
+
+      - name: Report failure
+        if: failure()
+        run: |
+          jq -n --arg s "$ENCODE_SECRET" --arg id "$ID" '{action:"encode_done", secret:$s, id:$id, ok:false, error:"فشل الضغط على GitHub — جرّب ملفاً آخر أو أعد المحاولة"}' \
+          | curl -s -X POST "$PUSH_URL" -H "Content-Type: application/json" -d @- || true

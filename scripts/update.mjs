@@ -524,7 +524,10 @@ writeJson(`${DATA}/matches.json`, { ...feed, matches });
 
 const hash = crypto.createHash('sha1').update(JSON.stringify({ ...feed, updated: 0 })).digest('hex');
 const heartbeat = NOW - (state.lastDeploy || 0) > 3 * 3600e3;
-const changed = hash !== state.lastHash || newLogos > 0 || newPosters > 0 || promoChanged || heartbeat || TEST;
+// ★ قوائم الزوار (scripts/catalog.mjs) تجدّدت ⇐ ننشر
+const catalogFresh = fs.existsSync(`${DATA}/catalog_fresh`);
+if (catalogFresh) fs.rmSync(`${DATA}/catalog_fresh`);
+const changed = hash !== state.lastHash || newLogos > 0 || newPosters > 0 || promoChanged || heartbeat || TEST || catalogFresh;
 const keepalive = NOW - (state.lastKeepalive || 0) > 25 * 864e5;
 if (changed) { state.lastHash = hash; state.lastDeploy = NOW; }
 if (keepalive) state.lastKeepalive = NOW;
@@ -546,7 +549,7 @@ if (changed) {
   writeJson(`${OUT}/matches.json`, feed);
   writeJson(`${OUT}/state.json`, state);
   writeJson(`${OUT}/status.json`, status);
-  for (const dir of ['logos', 'posters', 'promos']) {
+  for (const dir of ['logos', 'posters', 'promos', 'catalog']) {
     if (fs.existsSync(`${DATA}/${dir}`)) fs.cpSync(`${DATA}/${dir}`, `${OUT}/${dir}`, { recursive: true });
   }
   // لا ننشر إعلانات منتهية
@@ -557,6 +560,6 @@ if (changed) {
 }
 
 if (process.env.GITHUB_OUTPUT) {
-  fs.appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\nkeepalive=${keepalive}\n`);
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\nkeepalive=${keepalive}\ncatalog=${catalogFresh}\n`);
 }
 log(`انتهى — نشر: ${changed ? 'نعم' : 'لا تغيير'} | طلبات اليوم ${state.used} | شعارات ${newLogos} | صور إشعار ${newPosters} | إعلانات ${promos.length}`);

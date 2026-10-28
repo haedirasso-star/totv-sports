@@ -9,6 +9,10 @@ on:
         description: 'إرسال إشعار تجريبي لحساب المشرف (topic: admins)'
         type: boolean
         default: false
+      refresh_catalog:
+        description: 'تحديث قوائم الزوار الآن (بدل انتظار 12 ساعة)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -22,7 +26,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     outputs:
       changed: ${{ steps.run.outputs.changed }}
     steps:
@@ -39,6 +43,20 @@ jobs:
           key: feed-data-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: feed-data-
 
+      # sharp: صور الإشعارات وألوان الفرق ونسخ صور «الرئيسية» (webp صغيرة)
+      - name: Image tools
+        run: npm i --no-save --no-package-lock --silent sharp@0.33.5 || true
+
+      # ★ قوائم الزوار (القنوات/الأفلام/المسلسلات) — كل 12 ساعة، وتُنشر مع المباريات
+      - name: Catalog
+        run: node scripts/catalog.mjs || true
+        env:
+          XTREAM_HOST:   ${{ secrets.XTREAM_HOST }}
+          XTREAM_USER:   ${{ secrets.XTREAM_USER }}
+          XTREAM_PASS:   ${{ secrets.XTREAM_PASS }}
+          TMDB_KEY:      ${{ secrets.TMDB_KEY }}
+          CATALOG_FORCE: ${{ inputs.refresh_catalog }}
+
       - id: run
         run: node scripts/update.mjs
         env:
@@ -47,6 +65,38 @@ jobs:
           FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
           FEED_URL:            ${{ vars.FEED_URL }}
           TEST_NOTIFY:         ${{ inputs.test_notify }}
+
+      # ★ v3.6: نسخة على Cloudflare R2 (بلا رسوم استهلاك) — تُفعَّل بإضافة أسرار R2_*
+      #   الصور الجديدة فقط · المباريات كل مرة · الفهرس فقط حين يتجدد ⇐ عمليات قليلة جداً
+      - name: R2 sync
+        if: steps.run.outputs.changed == 'true'
+        env:
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          CATALOG:              ${{ steps.run.outputs.catalog }}
+        run: |
+          if [ -z "$R2_BUCKET" ] || [ -z "$R2_ACCESS_KEY_ID" ]; then echo "R2 غير مضبوط — تخطٍّ"; exit 0; fi
+          export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY" AWS_DEFAULT_REGION=auto
+          export AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+          EP="https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+          B="s3://$R2_BUCKET"
+          aws s3 sync out "$B/" --endpoint-url "$EP" --size-only --only-show-errors \
+            --exclude "*.json" --exclude "*.html" --exclude ".nojekyll" --exclude "catalog/*" \
+            --cache-control "public, max-age=86400"
+          for f in matches.json status.json; do
+            [ -f "out/$f" ] && aws s3 cp "out/$f" "$B/$f" --endpoint-url "$EP" --only-show-errors \
+              --content-type "application/json; charset=utf-8" --cache-control "public, max-age=60"
+          done
+          if [ "$CATALOG" = "true" ] && [ -d out/catalog ]; then
+            aws s3 sync out/catalog "$B/catalog" --endpoint-url "$EP" --size-only --only-show-errors \
+              --exclude "*.json" --cache-control "public, max-age=604800"
+            aws s3 sync out/catalog "$B/catalog" --endpoint-url "$EP" --only-show-errors \
+              --exclude "*" --include "*.json" --content-type "application/json; charset=utf-8" --cache-control "public, max-age=300"
+            echo "✓ الفهرس على R2"
+          fi
+          echo "✓ R2 محدّث"
 
       # GitHub يوقف الجدولة بعد 60 يوماً بلا نشاط — commit صغير كل 25 يوماً يمنع ذلك
       - if: steps.run.outputs.keepalive == 'true'

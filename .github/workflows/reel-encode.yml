@@ -43,8 +43,15 @@ jobs:
           [[ "$ID" =~ ^[A-Za-z0-9_-]{4,40}$ ]] || { echo "::error::معرّف غير صالح"; exit 1; }
           [[ "$RAW" =~ ^raw/[A-Za-z0-9_-]+\.[a-z0-9]{2,5}$ ]] || { echo "::error::مسار غير صالح"; exit 1; }
 
+      # ffmpeg جاهز (نسخة ثابتة ~5 ثوانٍ بدل apt ~70 ثانية) — احتياطاً apt إن تعذّر التنزيل
       - name: FFmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+        run: |
+          if curl -sfL --max-time 60 https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o ff.tar.xz; then
+            mkdir -p ff && tar -xf ff.tar.xz -C ff --strip-components=1 && sudo mv ff/ffmpeg ff/ffprobe /usr/local/bin/
+          else
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          fi
+          ffmpeg -version | head -1
 
       - name: Encode
         run: |
@@ -53,7 +60,7 @@ jobs:
           # 540p: العمودي عرضه 540، الأفقي ارتفاعه 540 · 30 إطاراً كحد أقصى · حتى 5 دقائق
           ffmpeg -hide_banner -loglevel error -y -i in.bin -t 300 \
             -vf "scale='if(gt(iw,ih),-2,min(540,iw))':'if(gt(iw,ih),min(540,ih),-2)':flags=lanczos,fps=fps='min(30,source_fps)'" \
-            -c:v libx264 -preset medium -crf 26 -maxrate 1400k -bufsize 2800k -profile:v main -pix_fmt yuv420p \
+            -c:v libx264 -preset veryfast -crf 26 -maxrate 1400k -bufsize 2800k -profile:v main -pix_fmt yuv420p \
             -c:a aac -b:a 96k -ac 2 -movflags +faststart out.mp4
           ffmpeg -hide_banner -loglevel error -y -ss 1 -i out.mp4 -frames:v 1 -q:v 4 poster.jpg \
             || ffmpeg -hide_banner -loglevel error -y -i out.mp4 -frames:v 1 -q:v 4 poster.jpg

@@ -9,10 +9,11 @@ jobs:
       - run: |
           mkdir out; cd out
           B=https://site.api.espn.com/apis/site/v2/sports/soccer
-          ID=$(curl -s "$B/eng.1/scoreboard?dates=20261101" | jq -r '.events[0].id'); echo "ev=$ID"
-          curl -s "$B/eng.1/summary?event=$ID" -o s.json
-          jq '.rosters[0].roster[0]' s.json > p0.json; cat p0.json | head -80
-          for aid in $(jq -r '.rosters[0].roster[].athlete.id' s.json | head -14); do echo "$aid $(curl -s -o /dev/null -w '%{http_code} %{size_download}' https://a.espncdn.com/i/headshots/soccer/players/full/$aid.png)"; done > hs.txt; cat hs.txt
+          ID=$(curl -s "$B/eng.1/scoreboard?dates=20261101" | jq -r '.events[0].id')
+          curl -s "$B/eng.1/summary?event=$ID" | jq '.rosters[0].roster[0].athlete.jerseyImages, .rosters[0].roster[0].media' > jer.json
+          for n in "Mohamed_Salah" "Lamine_Yamal" "Alisson" "Virgil_van_Dijk" "Ibrahima_Konate"; do curl -s "https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=$n" | jq -c '[.player[0]|{strPlayer,strNationality,strTeam,strCutout,strThumb,strRender}]' >> tsdb.txt; done
+          curl -s "https://en.wikipedia.org/api/rest_v1/page/summary/Lamine_Yamal" | jq -c '{t:.title,img:.thumbnail.source}' > wiki.txt
+          cat jer.json tsdb.txt wiki.txt
           ls -la
       - run: |
           cd out; git init -q; git checkout -q -b probe-out; git add .; git -c user.name=ci -c user.email=ci@x commit -qm p

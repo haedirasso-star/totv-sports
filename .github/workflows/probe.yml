@@ -8,8 +8,11 @@ jobs:
     steps:
       - run: |
           mkdir out; cd out
-          curl -s https://cdn.totv.app/feeds/plans.json -o plans.json; head -c 3000 plans.json; echo
-          curl -s https://cdn.totv.app/config.json | jq '.payment_numbers' > pay.json; cat pay.json | head -50
+          B=https://site.api.espn.com/apis/site/v2/sports/soccer
+          ID=$(curl -s "$B/eng.1/scoreboard?dates=20261101" | jq -r '.events[0].id'); echo "ev=$ID"
+          curl -s "$B/eng.1/summary?event=$ID" -o s.json
+          jq '.rosters[0].roster[0]' s.json > p0.json; cat p0.json | head -80
+          for aid in $(jq -r '.rosters[0].roster[].athlete.id' s.json | head -14); do echo "$aid $(curl -s -o /dev/null -w '%{http_code} %{size_download}' https://a.espncdn.com/i/headshots/soccer/players/full/$aid.png)"; done > hs.txt; cat hs.txt
           ls -la
       - run: |
           cd out; git init -q; git checkout -q -b probe-out; git add .; git -c user.name=ci -c user.email=ci@x commit -qm p

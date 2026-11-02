@@ -9,16 +9,14 @@ jobs:
       - run: |
           mkdir out; cd out
           B=https://site.api.espn.com/apis/site/v2/sports/soccer
-          curl -s "$B/uefa.champions/scoreboard?dates=20261103" -o ucl.json
-          curl -s "$B/esp.1/scoreboard?dates=20261101" -o esp_y.json
-          curl -s "$B/eng.1/scoreboard?dates=20261101" -o eng_y.json
-          curl -s "$B/esp.1/teams" -o esp_teams.json
-          curl -s "$B/irq.1/teams" -o irq_teams.json
-          curl -s "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard" -o all.json
-          ID=$(jq -r '.events[0].id' esp_y.json); echo "id=$ID"
-          curl -s "$B/esp.1/summary?event=$ID" -o sum.json
-          curl -s "https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/83/schedule" -o bar_sched.json
-          curl -s "$B/fifa.worldq.afc/scoreboard" -o afc.json
+          curl -s "$B/all/scoreboard?dates=20261103" -o all3.json
+          curl -s "$B/all/scoreboard?dates=20261103-20261109" -o allw.json
+          curl -s "https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/83/schedule?fixture=true" -o bar_fix.json
+          curl -s "https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/83/schedule?fixture=true" -o bar_fix2.json
+          curl -s "$B/esp.1/teams/83" -o bar_team.json
+          curl -s "$B/fifa.worldq.afc/teams" -o afc_teams.json
+          curl -s "$B/fifa.world/teams" -o wc_teams.json
+          curl -sI "https://a.espncdn.com/i/teamlogos/soccer/500/83.png" -o logo_head.txt
           ls -la
       - run: |
           cd out; git init -q; git checkout -q -b probe-out; git add .; git -c user.name=ci -c user.email=ci@x commit -qm p

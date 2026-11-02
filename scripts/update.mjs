@@ -171,6 +171,62 @@ if (state.rangeBad || state.freePlan) {
 }
 if (state.freePlan) log(`ℹ️ خطة مجانية: الأيام المطلوبة ${DAYS.filter(allowed).join('، ')}`);
 
+// ── 1ب) ★ احتياطي مجاني: ESPN (بلا مفتاح ولا حدود) ─────────────────
+//  يعمل تلقائياً إن تعطّل API-Football (حساب موقوف · لا مفتاح · نفد الرصيد) — المستخدم لا يرى «لا توجد مباريات» أبداً.
+//  أرقام فرق ESPN تُزاح بـ 10,000,000 حتى لا تختلط شعاراتها بشعارات API-Football.
+const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
+const espnSlug = new Map(cfg.leagues.filter(l => l.espn).map(l => [l.id, l.espn]));
+const apiDead = !KEY || /suspend|account|token|key|plan/i.test(state.lastError || '');
+const apiFresh = [TODAY, TOMORROW].every(d => state.sched[d] && NOW - state.sched[d] < 26 * 3600e3) && !state.espnMode;
+if (espnSlug.size && !MOCK && (apiDead || !apiFresh)) {
+  if (!state.espnMode) log('🔁 API-Football لا يعمل — التحويل إلى ESPN المجاني');
+  state.espnMode = apiDead || !apiFresh;
+  const espnState = s => {
+    const t = s?.type || {}, n = String(t.name || '');
+    if (t.state === 'pre') return /POSTPON/.test(n) ? 'PST' : /CANCEL/.test(n) ? 'CANC' : 'NS';
+    if (t.state === 'in') return /HALFTIME/.test(n) ? 'HT' : (Number(s.period) >= 3 ? 'ET' : Number(s.period) >= 2 ? '2H' : '1H');
+    return /PEN|SHOOTOUT/.test(n) ? 'PEN' : /AET|EXTRA/.test(n) ? 'AET' : /POSTPON/.test(n) ? 'PST' : 'FT';
+  };
+  const convEspn = (ev, lg) => {
+    const c = ev.competitions?.[0]; if (!c) return null;
+    const H = c.competitors?.find(x => x.homeAway === 'home'), A = c.competitors?.find(x => x.homeAway === 'away');
+    if (!H || !A) return null;
+    const st = espnState(c.status || ev.status);
+    const side = x => ({ id: 10000000 + Number(x.team.id), n: x.team.displayName || x.team.name,
+      src: x.team.logo || `https://a.espncdn.com/i/teamlogos/soccer/500/${x.team.id}.png` });
+    const sc = x => { const v = Number(typeof x.score === 'object' ? x.score?.value : x.score); return Number.isFinite(v) ? v : null; };
+    return { id: Number(ev.id), lg, rd: '', ts: Math.floor(Date.parse(ev.date) / 1000), st, src: 'espn',
+      h: side(H), a: side(A), venue: c.venue?.fullName || '', lgSrc: '',
+      gh: st === 'NS' ? null : sc(H), ga: st === 'NS' ? null : sc(A) };
+  };
+  const ymd = d => d.replace(/-/g, '');
+  const getJ = async u => { try { const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0', accept: 'application/json' } }); return r.ok ? await r.json() : null; } catch { return null; } };
+  // اليوم والأمس كل تشغيل (نتائج وحالة مباشرة) · بقية الأسبوع كل 3 ساعات
+  const week = !state.espnWeekAt || NOW - state.espnWeekAt > 3 * 3600e3;
+  const want = week ? [YESTERDAY, ...DAYS] : [YESTERDAY, TODAY, TOMORROW];
+  let got = 0; const okDays = new Set();
+  for (const d of want) {
+    const res = await Promise.all([...espnSlug].map(async ([lg, slug]) => [lg, await getJ(`${ESPN}/${slug}/scoreboard?dates=${ymd(d)}`)]));
+    const fresh = [];
+    let anyOk = false;
+    for (const [lg, j] of res) {
+      if (!j) continue; anyOk = true;
+      for (const ev of j.events || []) {
+        const m = convEspn(ev, lg);
+        if (m && dayOf(m.ts * 1000) === d) fresh.push(m);
+      }
+    }
+    if (!anyOk) continue;
+    for (const [id, m] of byId) if (dayOf(m.ts * 1000) === d) byId.delete(id);
+    for (const m of fresh) { const old = byId.get(m.id); byId.set(m.id, old ? { ...old, ...m } : m); }
+    state.sched[d] = NOW; okDays.add(d); got += fresh.length;
+  }
+  if (week && okDays.size) state.espnWeekAt = NOW;
+  log(`📅 ESPN: ${got} مباراة في ${okDays.size} يوم`);
+  // نعيد اختبار API-Football كل 6 ساعات (لو حُلّت مشكلة الحساب)
+  if (!state.apiRetryAt || NOW - state.apiRetryAt > 6 * 3600e3) { state.apiRetryAt = NOW; state.lastError = ''; state.espnMode = false; delete state.sched[TODAY]; delete state.sched[TOMORROW]; state.freePlan = false; state.rangeBad = false; }
+}
+
 // نتائج الأمس (للتوقعات): طلب واحد فقط في اليوم، وفقط إن بقيت مباراة بلا نتيجة نهائية
 {
   const DONE = new Set(['FT', 'AET', 'PEN']);

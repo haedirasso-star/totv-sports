@@ -8,11 +8,10 @@ jobs:
     steps:
       - run: |
           mkdir out; cd out
-          F=https://hlmaksidfqdarwunedqj.supabase.co/functions/v1/push
-          sleep 25
-          curl -s -X POST "$F" -H 'Content-Type: application/json' -d '{"action":"live_tick"}' -o tick.json; cat tick.json; echo
-          for u in https://cdn.totv.app/live/clubs.json https://cdn.totv.app/live/live.json https://cdn.totv.app/live/logos/83.png; do curl -s -o /dev/null -w "%{http_code} %{size_download} $u\n" "$u"; done
-          curl -s https://cdn.totv.app/live/clubs.json -o clubs.json; curl -s https://cdn.totv.app/live/live.json -o live.json
+          B=https://site.api.espn.com/apis/site/v2/sports/soccer
+          for i in 202 205 448 478 481 482 164 162 449 655 2917 8346 4375; do echo "$i $(curl -s "$B/fifa.world/teams/$i" | jq -r '.team.displayName')" >> ids.txt; done
+          curl -s "$B/ksa.1/scoreboard" | jq '{n:(.events|length), logo:.leagues[0].logos[0].href, name:.leagues[0].name}' > ksa.json
+          cat ids.txt ksa.json
           ls -la
       - run: |
           cd out; git init -q; git checkout -q -b probe-out; git add .; git -c user.name=ci -c user.email=ci@x commit -qm p

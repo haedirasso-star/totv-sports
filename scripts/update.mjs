@@ -187,7 +187,7 @@ if (espnSlug.size && !MOCK && (apiDead || !apiFresh)) {
     if (t.state === 'in') return /HALFTIME/.test(n) ? 'HT' : (Number(s.period) >= 3 ? 'ET' : Number(s.period) >= 2 ? '2H' : '1H');
     return /PEN|SHOOTOUT/.test(n) ? 'PEN' : /AET|EXTRA/.test(n) ? 'AET' : /POSTPON/.test(n) ? 'PST' : 'FT';
   };
-  const convEspn = (ev, lg) => {
+  const convEspn = (ev, lg, lgLogo = '') => {
     const c = ev.competitions?.[0]; if (!c) return null;
     const H = c.competitors?.find(x => x.homeAway === 'home'), A = c.competitors?.find(x => x.homeAway === 'away');
     if (!H || !A) return null;
@@ -196,7 +196,7 @@ if (espnSlug.size && !MOCK && (apiDead || !apiFresh)) {
       src: x.team.logo || `https://a.espncdn.com/i/teamlogos/soccer/500/${x.team.id}.png` });
     const sc = x => { const v = Number(typeof x.score === 'object' ? x.score?.value : x.score); return Number.isFinite(v) ? v : null; };
     return { id: Number(ev.id), lg, rd: '', ts: Math.floor(Date.parse(ev.date) / 1000), st, src: 'espn',
-      h: side(H), a: side(A), venue: c.venue?.fullName || '', lgSrc: '',
+      h: side(H), a: side(A), venue: c.venue?.fullName || '', lgSrc: lgLogo,
       gh: st === 'NS' ? null : sc(H), ga: st === 'NS' ? null : sc(A) };
   };
   const ymd = d => d.replace(/-/g, '');
@@ -211,8 +211,9 @@ if (espnSlug.size && !MOCK && (apiDead || !apiFresh)) {
     let anyOk = false;
     for (const [lg, j] of res) {
       if (!j) continue; anyOk = true;
+      const lgLogo = j.leagues?.[0]?.logos?.[0]?.href || '';
       for (const ev of j.events || []) {
-        const m = convEspn(ev, lg);
+        const m = convEspn(ev, lg, lgLogo);
         if (m && dayOf(m.ts * 1000) === d) fresh.push(m);
       }
     }

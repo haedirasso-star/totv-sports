@@ -71,6 +71,14 @@
       "order": 8,
       "color": "#0D1B4C",
       "espn": "fra.1"
+    },
+    {
+      "id": 307,
+      "ar": "دوري روشن السعودي",
+      "weight": 7,
+      "order": 5,
+      "color": "#0B6B3A",
+      "espn": "ksa.1"
     }
   ],
   "bigTeams": [
@@ -104,7 +112,13 @@
     "Atlético Madrid",
     "Internazionale",
     "Paris Saint-Germain",
-    "Tottenham Hotspur"
+    "Tottenham Hotspur",
+    "Al Hilal",
+    "Al Nassr",
+    "Al Ittihad",
+    "Al Ahli",
+    "Al-Hilal",
+    "Al-Nassr"
   ],
   "_channels": "كلمات البحث عن القناة الناقلة في سيرفرك حسب الدوري — الأولى لها الأفضلية. default تُستخدم لأي دوري غير مذكور.",
   "channels": {

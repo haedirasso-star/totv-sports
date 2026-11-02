@@ -8,10 +8,9 @@ jobs:
     steps:
       - run: |
           mkdir out; cd out
-          F=https://hlmaksidfqdarwunedqj.supabase.co/functions/v1/push
-          sleep 30
-          curl -s -X POST "$F" -H 'Content-Type: application/json' -d '{"action":"live_tick"}' > t1.json; cat t1.json; echo
-          curl -s https://cdn.totv.app/live/live.json | jq -c '[.games[]|select(.lu!=null)|{h:.h.ar,a:.a.ar,p:[.lu.home.xi[]?|{n,ph,iso}][0:4]}][0:2]' > lu.json; cat lu.json
+          curl -s -L -A "Mozilla/5.0" -o doc.html -w "%{http_code} %{size_download}\n" https://maxtv-panel.com/iptv/api/ > code.txt; cat code.txt
+          python3 -c "import re,html;t=open('doc.html',errors='ignore').read();t=re.sub(r'(?s)<(script|style).*?</\\1>','',t);t=re.sub(r'<[^>]+>','\\n',t);t=html.unescape(t);t=re.sub(r'\\n\\s*\\n+','\\n',t);open('doc.txt','w').write(t)"
+          head -c 400 doc.txt
           ls -la
       - run: |
           cd out; git init -q; git checkout -q -b probe-out; git add .; git -c user.name=ci -c user.email=ci@x commit -qm p

@@ -8,12 +8,10 @@ jobs:
     steps:
       - run: |
           mkdir out; cd out
-          B=https://site.api.espn.com/apis/site/v2/sports/soccer
-          ID=$(curl -s "$B/eng.1/scoreboard?dates=20261101" | jq -r '.events[0].id')
-          curl -s "$B/eng.1/summary?event=$ID" | jq '.rosters[0].roster[0].athlete.jerseyImages, .rosters[0].roster[0].media' > jer.json
-          for n in "Mohamed_Salah" "Lamine_Yamal" "Alisson" "Virgil_van_Dijk" "Ibrahima_Konate"; do curl -s "https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=$n" | jq -c '[.player[0]|{strPlayer,strNationality,strTeam,strCutout,strThumb,strRender}]' >> tsdb.txt; done
-          curl -s "https://en.wikipedia.org/api/rest_v1/page/summary/Lamine_Yamal" | jq -c '{t:.title,img:.thumbnail.source}' > wiki.txt
-          cat jer.json tsdb.txt wiki.txt
+          F=https://hlmaksidfqdarwunedqj.supabase.co/functions/v1/push
+          sleep 30
+          curl -s -X POST "$F" -H 'Content-Type: application/json' -d '{"action":"live_tick"}' > t1.json; cat t1.json; echo
+          curl -s https://cdn.totv.app/live/live.json | jq -c '[.games[]|select(.lu!=null)|{h:.h.ar,a:.a.ar,p:[.lu.home.xi[]?|{n,ph,iso}][0:4]}][0:2]' > lu.json; cat lu.json
           ls -la
       - run: |
           cd out; git init -q; git checkout -q -b probe-out; git add .; git -c user.name=ci -c user.email=ci@x commit -qm p

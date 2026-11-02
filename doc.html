@@ -1,0 +1,1082 @@
+<!doctype html>
+<html>
+<head>
+    <title>Resellers API</title>
+	
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.css" crossorigin="anonymous">
+	<style>
+	body{
+		padding: 50px;
+	}
+	.card{margin:10px;}
+	//pre{text-color:yellow;}
+	</style>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	
+	<script>
+	$( document ).ready(function() {
+		$('.OpenModalByC').on('click',function(){
+			
+			
+			$('.modal-title').html($(this).data('title'));
+			
+			$('.modal-body').load($(this).data('url'),function(){
+				$('#myModal').modal({show:true});
+			});
+			
+			return false;
+			
+		});		
+	});		
+	</script>
+	
+	
+
+</head>
+<body>
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-light">
+			<div class="card-header">POST</div>
+			<div class="card-body">http://your-traget-api-url.com/api/</div>
+		</div>
+	</div>
+</div>
+
+<div class="card-group">
+
+		<div class="card">
+		<div class="card-block">
+			  <div class="card-header">Request: info</div>
+			  <div class="bg-light" style="padding:10px 50px 0px 50px;"><code><pre>{"api_key":"YOUR-KEY-HERE","mode":"info"}</pre></code></div>
+			  <div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Parameter</th>
+								<th>Value</th>
+								<th>Type</th>
+								<th>Position</th>
+								<th>#</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+			<td>api_key</td>
+			<td>API Key</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>Your API KEY</td></tr><tr>
+			<td>mode</td>
+			<td>info</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>to get your full info</td></tr>						</tbody>
+					</table>
+		
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="card">
+		<div class="card-block">
+		  <div class="card-header">Response</div>
+		  <div class="card-body"><pre style="height:300px;overflow: scroll;">{
+    "status": 100,
+    "message": "Success",
+    "info": {
+        "id": "94",
+        "name": "admin2",
+        "username": "admin2",
+        "totalCodes": "0",
+        "totalUsers": "2",
+        "totalMag": "0",
+        "totalE2": 0,
+        "balance": 9868,
+        "packages": {
+            "2": {
+                "PkgID": "2",
+                "PkgName": "6 months Official",
+                "PkgCredits": "6",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            },
+            "4": {
+                "PkgID": "4",
+                "PkgName": "3 months Official",
+                "PkgCredits": "3",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            },
+            "5": {
+                "PkgID": "5",
+                "PkgName": "1 year Official",
+                "PkgCredits": "12",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            },
+            "7": {
+                "PkgID": "7",
+                "PkgName": "1 months Official",
+                "PkgCredits": "1",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            },
+            "1": {
+                "PkgID": "1",
+                "PkgName": "trial 1 day",
+                "PkgCredits": "0",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            },
+            "3": {
+                "PkgID": "3",
+                "PkgName": "trail 6 hours",
+                "PkgCredits": "0",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            },
+            "6": {
+                "PkgID": "6",
+                "PkgName": "trail 12 hours",
+                "PkgCredits": "0",
+                "PkgBouquets": [
+                    {
+                        "id": 5,
+                        "name": "Sports Channels"
+                    },
+                    {
+                        "id": 6,
+                        "name": "News Channels"
+                    }
+                ]
+            }
+        }
+    }
+}</pre></div>
+
+		</div>
+		</div>
+	
+</div>
+
+<hr/>
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-light">
+			<div class="card-header">POST</div>
+			<div class="card-body">http://your-traget-api-url.com/api/</div>
+		</div>
+	</div>
+</div>
+
+<div class="card-group">
+
+		<div class="card">
+		<div class="card-block">
+			  <div class="card-header">Request: userAdd</div>
+			  <div class="bg-light" style="padding:10px 50px 0px 50px;"><code><pre>{"api_key":"YOUR-KEY-HERE","mode":"userAdd","username":"demouser01","bouquets":[1,5,6,9,7,8,2,3,9,5,1,1,1,1,1],"PkgID":1,"notes":"hi iam notes"}</pre></code></div>
+			  <div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Parameter</th>
+								<th>Value</th>
+								<th>Type</th>
+								<th>Position</th>
+								<th>#</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+			<td>api_key</td>
+			<td>API Key</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>Your API KEY</td></tr><tr>
+			<td>mode</td>
+			<td>userAdd</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>to add user</td></tr><tr>
+			<td>username</td>
+			<td>demouser01</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>the username</td></tr><tr>
+			<td>PkgID</td>
+			<td>1</td>
+			<td><code>int</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>the Package ID</td></tr><tr>
+			<td>bouquets</td>
+			<td>[1,2,3,4.....]</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Not Required</code></td><td>**STRING JSON CODE** the Bouquets for user, leave empty to use default Bouquets</td></tr><tr>
+			<td>userCountry</td>
+			<td>US</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Not Required</code></td><td><a class="OpenModalByC" href="javascript:void(0);" data-title="userCountry" data-url="json/user.userCountry.html" title="Click for More info">if would like to lock user by Country.  [...more]</a></td></tr><tr>
+			<td>notes</td>
+			<td>any note</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Not Required</code></td><td>if you would like to add notes</td></tr>						</tbody>
+					</table>
+		
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="card">
+		<div class="card-block">
+		  <div class="card-header">Response</div>
+		  <div class="card-body"><pre style="height:300px;overflow: scroll;">{
+    "status": 100,
+    "message": "Success",
+    "userAdd": {
+        "userid": 123,
+        "username": "demouser171042",
+        "password": "mbABC6SaxPbb",
+        "isTrial": "1",
+        "exipreDate": "2020-12-26 17:10:42",
+        "bouquets": "[5,6]"
+    }
+}</pre></div>
+
+		</div>
+		</div>
+	
+</div>
+
+<hr/>
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-light">
+			<div class="card-header">POST</div>
+			<div class="card-body">http://your-traget-api-url.com/api/</div>
+		</div>
+	</div>
+</div>
+
+<div class="card-group">
+
+		<div class="card">
+		<div class="card-block">
+			  <div class="card-header">Request: userInfo</div>
+			  <div class="bg-light" style="padding:10px 50px 0px 50px;"><code><pre>{"api_key":"YOUR-KEY-HERE","mode":"userInfo","username":"demouser230606","userID":7}</pre></code></div>
+			  <div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Parameter</th>
+								<th>Value</th>
+								<th>Type</th>
+								<th>Position</th>
+								<th>#</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+			<td>api_key</td>
+			<td>API Key</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>Your API KEY</td></tr><tr>
+			<td>mode</td>
+			<td>userInfo</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>get user info</td></tr><tr>
+			<td>username</td>
+			<td>demouser01</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required*</code></td><td>the username | or userID You can send one of them</td></tr><tr>
+			<td>userID</td>
+			<td>7</td>
+			<td><code>int</code></td>
+			<td><code>body</code></td>
+			<td><code>Required*</code></td><td>the user ID | or username You can send one of them</td></tr>						</tbody>
+					</table>
+		
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="card">
+		<div class="card-block">
+		  <div class="card-header">Response</div>
+		  <div class="card-body"><pre style="height:300px;overflow: scroll;">{
+    "status": 100,
+    "message": "Success",
+    "userInfo": {
+        "userid": "26",
+        "username": "demouser000358",
+        "password": "JlZEI3DQqcTe",
+        "isTrial": "1",
+        "exipreDate": "2027-12-25 16:30:49",
+        "bouquets": "[5,6]"
+    }
+}</pre></div>
+
+		</div>
+		</div>
+	
+</div>
+
+<hr/>
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-light">
+			<div class="card-header">POST</div>
+			<div class="card-body">http://your-traget-api-url.com/api/</div>
+		</div>
+	</div>
+</div>
+
+<div class="card-group">
+
+		<div class="card">
+		<div class="card-block">
+			  <div class="card-header">Request: userList</div>
+			  <div class="bg-light" style="padding:10px 50px 0px 50px;"><code><pre>{"api_key":"YOUR-KEY-HERE","mode":"userList"}</pre></code></div>
+			  <div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Parameter</th>
+								<th>Value</th>
+								<th>Type</th>
+								<th>Position</th>
+								<th>#</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+			<td>api_key</td>
+			<td>API Key</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>Your API KEY</td></tr><tr>
+			<td>mode</td>
+			<td>userList</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>get all users</td></tr>						</tbody>
+					</table>
+		
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="card">
+		<div class="card-block">
+		  <div class="card-header">Response</div>
+		  <div class="card-body"><pre style="height:300px;overflow: scroll;">{
+    "status": 100,
+    "message": "Success",
+    "userList": [
+        {
+            "userid": "123",
+            "username": "demouser171042",
+            "password": "mbABC6SaxPbb",
+            "isTrial": "1",
+            "exipreDate": "2020-12-26 17:10:42",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "117",
+            "username": "demouser004816",
+            "password": "Wxlyfn6sgqFW",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:48:16",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "116",
+            "username": "demouser004815",
+            "password": "k8hUqfM4Cd5n",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:48:14",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "115",
+            "username": "demouser004732",
+            "password": "mxPQS7a6I1XB",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:47:31",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "114",
+            "username": "demouser004730",
+            "password": "ss10276eb7DI",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:47:30",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "109",
+            "username": "demousaser333003940",
+            "password": "98jTKNtqwoXo",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:44:43",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "108",
+            "username": "demouser004405",
+            "password": "1Vsihtwo2g0S",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:44:04",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "107",
+            "username": "demouser004403",
+            "password": "0TQUILlkMuzl",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:44:03",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "106",
+            "username": "demouser004324",
+            "password": "DQdZ6AsPR4Ef",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:43:23",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "105",
+            "username": "demouser004314",
+            "password": "Ycpm14Hmhf8q",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:43:14",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "102",
+            "username": "demouser003940",
+            "password": "er86PW8fqee0",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:39:39",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "100",
+            "username": "demouser003839",
+            "password": "EjORTSKdZ8Ii",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:38:38",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "99",
+            "username": "demouser003832",
+            "password": "EYhjB51JQr6F",
+            "isTrial": "1",
+            "exipreDate": "2020-12-25 00:38:31",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "42",
+            "username": "demouser154555",
+            "password": "Y4YfySOKPOFC",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:55",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "41",
+            "username": "demouser154554",
+            "password": "kSDFBN3xWZpU",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:54",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "40",
+            "username": "demouser154553",
+            "password": "pssyhH03VbV8",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:53",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "39",
+            "username": "demouser154552",
+            "password": "AUZA2nZcsOq2",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:52",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "38",
+            "username": "demouser154551",
+            "password": "IwXdOiSZVdo7",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:51",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "37",
+            "username": "demouser154545",
+            "password": "vL7h5zyfX7pl",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:45",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "36",
+            "username": "demouser154544",
+            "password": "c8BjbsRDm7Cz",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:43",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "35",
+            "username": "demouser154543",
+            "password": "ADT97EF7wEYz",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:42",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "34",
+            "username": "demouser154542",
+            "password": "q0YR6MZpLUTf",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:42",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "33",
+            "username": "demouser154541",
+            "password": "6FLl09S8zbLY",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:41",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "32",
+            "username": "demouser154538",
+            "password": "uAJOUCjD2DQO",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:37",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "31",
+            "username": "demouser154537",
+            "password": "OLdqUvsxJ4zC",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:36",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "30",
+            "username": "demouser154535",
+            "password": "jMXLFzkFTwym",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:35",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "29",
+            "username": "demouser154533",
+            "password": "ibtKHBBKC5SC",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 15:45:33",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "26",
+            "username": "demouser000358",
+            "password": "JlZEI3DQqcTe",
+            "isTrial": "1",
+            "exipreDate": "2027-12-25 16:30:49",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "25",
+            "username": "demouser000357",
+            "password": "mPnrydtUw3bS",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:55",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "24",
+            "username": "demouser000356",
+            "password": "V99AMyqtwzsN",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:54",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "23",
+            "username": "demouser000355",
+            "password": "UKmump2Muyyh",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:53",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "22",
+            "username": "demouser000354",
+            "password": "uTkFKXtGYmG0",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:52",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "21",
+            "username": "demouser000353",
+            "password": "Aom8ara2tyOs",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:51",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "20",
+            "username": "demouser000352",
+            "password": "C1lsjKIVK5TP",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:50",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "19",
+            "username": "demouser000351",
+            "password": "CZA0r1OwzwCB",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:49",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "18",
+            "username": "demouser000350",
+            "password": "UvYvCjEK61fR",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:48",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "17",
+            "username": "demouser000349",
+            "password": "lAHN35M71Z5z",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:47",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "16",
+            "username": "demouser000348",
+            "password": "ApeNA84kBFoM",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:46",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "15",
+            "username": "demouser000347",
+            "password": "rxOniSJ5pK3h",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:45",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "14",
+            "username": "demouser000343",
+            "password": "1DsrsGj0flx0",
+            "isTrial": "1",
+            "exipreDate": "2020-12-24 00:03:41",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "13",
+            "username": "mohammed234449",
+            "password": "3NFOz6IuBtMc",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:44:46",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "12",
+            "username": "mohammed231608",
+            "password": "u6VA6uROfIDy",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:16:06",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "11",
+            "username": "mohammed231525",
+            "password": "H8DoJj37z8kW",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:15:23",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "10",
+            "username": "mohammed230924",
+            "password": "bXA8mlMgSt0o",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:09:22",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "9",
+            "username": "mohammed230914",
+            "password": "Kfoi5fG1CPWb",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:09:12",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "8",
+            "username": "mohammed230609",
+            "password": "OETCNRV34F6D",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:06:07",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "7",
+            "username": "mohammed230606",
+            "password": "nnEe9vW0SIBo",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:06:04",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "6",
+            "username": "mohammed230604",
+            "password": "uRan11Lmzygy",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 23:06:02",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "5",
+            "username": "mohammed1year2",
+            "password": "8x7zOpjtrHmE",
+            "isTrial": "0",
+            "exipreDate": "2021-12-22 23:04:29",
+            "bouquets": "[5,6]"
+        },
+        {
+            "userid": "4",
+            "username": "mohammed1year",
+            "password": "Ta6ywbkXkFIf",
+            "isTrial": "0",
+            "exipreDate": "2021-12-22 22:09:00",
+            "bouquets": ""
+        },
+        {
+            "userid": "3",
+            "username": "mohammed5002",
+            "password": "fm5wpzMq9tEB",
+            "isTrial": "1",
+            "exipreDate": "2020-12-23 21:51:44",
+            "bouquets": ""
+        }
+    ]
+}</pre></div>
+
+		</div>
+		</div>
+	
+</div>
+
+<hr/>
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-light">
+			<div class="card-header">POST</div>
+			<div class="card-body">http://your-traget-api-url.com/api/</div>
+		</div>
+	</div>
+</div>
+
+<div class="card-group">
+
+		<div class="card">
+		<div class="card-block">
+			  <div class="card-header">Request: userEdit</div>
+			  <div class="bg-light" style="padding:10px 50px 0px 50px;"><code><pre>{"api_key":"YOUR-KEY-HERE","mode":"userEdit","userID":26,"username":"demouser000358","password":"newpassword","bouquets":"[6,4]","notes":"i updated the notes"}</pre></code></div>
+			  <div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Parameter</th>
+								<th>Value</th>
+								<th>Type</th>
+								<th>Position</th>
+								<th>#</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+			<td>api_key</td>
+			<td>API Key</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>Your API KEY</td></tr><tr>
+			<td>mode</td>
+			<td>userAdd</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>to add user</td></tr><tr>
+			<td>userID</td>
+			<td>7</td>
+			<td><code>int</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>the user ID i needed to edit data.</td></tr><tr>
+			<td>username</td>
+			<td>demouser01</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Optional</code></td><td>the username</td></tr><tr>
+			<td>bouquets</td>
+			<td>[1,2,3,4.....]</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Optional</code></td><td>new Bouquets for user to change</td></tr><tr>
+			<td>notes</td>
+			<td>any note</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Optional</code></td><td>if want to change notes</td></tr>						</tbody>
+					</table>
+		
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="card">
+		<div class="card-block">
+		  <div class="card-header">Response</div>
+		  <div class="card-body"><pre style="height:300px;overflow: scroll;">﻿﻿{
+    "status": 100,
+    "message": "Success",
+    "userEdit": {
+        "userid": "26",
+        "username": "demouser000358",
+        "password": "JlZEI3DQqcTe",
+        "isTrial": "1",
+        "exipreDate": "2020-12-24 00:03:56",
+        "bouquets": "[5,6]"
+    }
+}</pre></div>
+
+		</div>
+		</div>
+	
+</div>
+
+<hr/>
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-light">
+			<div class="card-header">POST</div>
+			<div class="card-body">http://your-traget-api-url.com/api/</div>
+		</div>
+	</div>
+</div>
+
+<div class="card-group">
+
+		<div class="card">
+		<div class="card-block">
+			  <div class="card-header">Request: userRenew</div>
+			  <div class="bg-light" style="padding:10px 50px 0px 50px;"><code><pre>{"api_key":"YOUR-KEY-HERE","mode":"userRenew","userID":26,"PkgID":5}</pre></code></div>
+			  <div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Parameter</th>
+								<th>Value</th>
+								<th>Type</th>
+								<th>Position</th>
+								<th>#</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+			<td>api_key</td>
+			<td>API Key</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>Your API KEY</td></tr><tr>
+			<td>mode</td>
+			<td>userRenew</td>
+			<td><code>string</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>to add user</td></tr><tr>
+			<td>userID</td>
+			<td>7</td>
+			<td><code>int</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>the user ID i needed to edit data.</td></tr><tr>
+			<td>PkgID</td>
+			<td>1</td>
+			<td><code>int</code></td>
+			<td><code>body</code></td>
+			<td><code>Required</code></td><td>the Package ID</td></tr>						</tbody>
+					</table>
+		
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="card">
+		<div class="card-block">
+		  <div class="card-header">Response</div>
+		  <div class="card-body"><pre style="height:300px;overflow: scroll;">{
+    "status": 100,
+    "message": "Success",
+    "userRenew": {
+        "userid": "26",
+        "exipreDate": "2028-12-25 16:30:49"
+    }
+}</pre></div>
+
+		</div>
+		</div>
+	
+</div>
+
+<hr/>
+<div class="row">
+	<div class="col-md-12">	
+		<div class="card bg-secondary">
+			<div class="card-header">Example</div>
+			<div class="card-body">
+			
+			
+	<code><pre>$url = 'http://your-traget-api-url.com/api/';</pre></code>		
+	<code><pre>//for info
+ $data = '{"api_key":"YOUR-KEY-HERE","mode":"info"}';
+//for userAdd
+ $data = '{"api_key":"YOUR-KEY-HERE","mode":"userAdd","username":"demouser01","bouquets":[1,5,6,9,7,8,2,3,9,5,1,1,1,1,1],"PkgID":1,"notes":"hi iam notes"}';
+//for userInfo
+ $data = '{"api_key":"YOUR-KEY-HERE","mode":"userInfo","username":"demouser230606","userID":7}';
+//for userList
+ $data = '{"api_key":"YOUR-KEY-HERE","mode":"userList"}';
+//for userEdit
+ $data = '{"api_key":"YOUR-KEY-HERE","mode":"userEdit","userID":26,"username":"demouser000358","password":"newpassword","bouquets":"[6,4]","notes":"i updated the notes"}';
+//for userRenew
+ $data = '{"api_key":"YOUR-KEY-HERE","mode":"userRenew","userID":26,"PkgID":5}';
+</pre></code>
+	
+<pre>$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS,$data);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2 );
+curl_setopt($ch, CURLOPT_TIMEOUT, 5 );
+$output = curl_exec($ch);
+curl_close($ch);
+
+echo $output;//outpu is json
+</pre>
+			</div>
+		</div>
+	</div>
+</div>
+
+<hr/>

@@ -9,7 +9,7 @@ jobs:
       - run: |
           mkdir out; cd out
           B=https://site.api.espn.com/apis/site/v2/sports/soccer
-          for l in eng.1 ita.1 ger.1 fra.1 ksa.1 esp.1 por.1 ned.1 tur.1 egy.1 uae.1 qat.1; do curl -s "$B/$l/teams" | jq -r --arg l $l '.sports[0].leagues[0].teams[].team|$l+" "+.id+" "+.displayName' >> teams.txt; done
+          for l in eng.1 ita.1 ger.1 fra.1 ksa.1 esp.1 por.1 ned.1 tur.1 egy.1 uae.1 qat.1; do curl -s "$B/$l/teams" | jq -r --arg l $l '(.sports[0].leagues[0].teams // [])[].team|$l+" "+.id+" "+.displayName' >> teams.txt || true; done
           curl -s "$B/uefa.champions/summary?event=401915311" -o sum_pre.json
           ls -la
       - run: |

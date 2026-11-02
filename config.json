@@ -79,6 +79,14 @@
       "order": 5,
       "color": "#0B6B3A",
       "espn": "ksa.1"
+    },
+    {
+      "id": 17,
+      "ar": "دوري أبطال آسيا للنخبة",
+      "weight": 9,
+      "order": 3,
+      "color": "#5B1F8A",
+      "espn": "afc.champions"
     }
   ],
   "bigTeams": [

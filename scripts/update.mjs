@@ -324,23 +324,36 @@ const AR_SEED = {
 };
 const arName = n => state.teamsAr[n] || AR_SEED[n] || '';
 
+// النماذج تُسحب من Google دورياً ⇐ نجرب المحفوظ ثم البدائل ونحفظ أول نموذج يعمل
+const G_MODELS = () => [...new Set([state.gModel, cfg.geminiModel, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest',
+  'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean))];
 async function gemini(prompt) {
   if (!GKEY || MOCK || (state.ai || 0) >= 60) return null;
   state.ai = (state.ai || 0) + 1;
-  try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cfg.geminiModel}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GKEY },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.9 },
-      }),
-    });
-    const j = await r.json();
-    const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!txt) { log('AI: رد فارغ', JSON.stringify(j).slice(0, 300)); return null; }
-    return JSON.parse(txt);
-  } catch (e) { log('AI:', e.message); return null; }
+  for (const model of G_MODELS()) {
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GKEY },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.9 },
+        }),
+      });
+      const j = await r.json();
+      if (r.status === 404 || /no longer available|not found/i.test(j?.error?.message || '')) {
+        log(`AI: النموذج ${model} غير متاح — تجربة التالي`);
+        if (state.gModel === model) state.gModel = null;
+        continue;
+      }
+      const txt = (j?.candidates?.[0]?.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join('')
+        .replace(/^\s*```(json)?\s*|\s*```\s*$/g, '');
+      if (!txt) { log('AI: رد فارغ', JSON.stringify(j).slice(0, 300)); return null; }
+      state.gModel = model;
+      return JSON.parse(txt);
+    } catch (e) { log('AI:', e.message); return null; }
+  }
+  return null;
 }
 
 const missing = [...new Set([...byId.values()].flatMap(m => [m.h.n, m.a.n]).filter(n => !arName(n)))].slice(0, 120);

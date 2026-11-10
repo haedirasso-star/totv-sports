@@ -88,7 +88,7 @@ jobs:
           aws s3 sync out "$B/" --endpoint-url "$EP" --size-only --only-show-errors \
             --exclude "*.json" --exclude "*.html" --exclude ".nojekyll" --exclude "catalog/*" \
             --cache-control "public, max-age=86400"
-          for f in matches.json status.json; do
+          for f in matches.json status.json names/ar.json names/missing.json; do
             [ -f "out/$f" ] && aws s3 cp "out/$f" "$B/$f" --endpoint-url "$EP" --only-show-errors \
               --content-type "application/json; charset=utf-8" --cache-control "public, max-age=60"
           done

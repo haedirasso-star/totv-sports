@@ -381,7 +381,10 @@ const AR_SEED = {
   'Inter': 'إنتر ميلان', 'AC Milan': 'ميلان', 'Napoli': 'نابولي', 'Paris Saint Germain': 'باريس سان جيرمان',
   'Iraq': 'العراق', 'Saudi Arabia': 'السعودية',
 };
-const arName = n => state.teamsAr[n] || AR_SEED[n] || '';
+// ★ قاموسنا الثابت (names/ar.json) أولاً — مكتوب ومراجَع يدوياً، لا ذكاء اصطناعي
+const DICT = (() => { try { return JSON.parse(fs.readFileSync('names/ar.json', 'utf8')); } catch { return {}; } })();
+const pureAr = v => typeof v === 'string' && v.trim() && !/[^\u0621-\u064A\u064B-\u0652\u0670\s\-.'0-9()]/.test(v);
+const arName = n => DICT[n] || AR_SEED[n] || (pureAr(state.teamsAr[n]) ? state.teamsAr[n] : '');
 
 // النماذج تُسحب من Google دورياً ⇐ نجرب المحفوظ ثم البدائل ونحفظ أول نموذج يعمل
 const G_MODELS = () => [...new Set([state.gModel, cfg.geminiModel, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest',
@@ -415,13 +418,12 @@ async function gemini(prompt) {
   return null;
 }
 
-const missing = [...new Set([...byId.values()].flatMap(m => [m.h.n, m.a.n]).filter(n => !arName(n)))].slice(0, 120);
-if (missing.length) {
-  const tr = await gemini(
-    'ترجم أسماء أندية ومنتخبات كرة القدم التالية إلى الاسم العربي الشائع في الإعلام الرياضي العربي. ' +
-    'أعد كائن JSON فقط: المفتاح هو الاسم الأصلي حرفياً والقيمة هي الاسم العربي.\n' + JSON.stringify(missing));
-  if (tr && typeof tr === 'object') for (const n of missing) if (typeof tr[n] === 'string' && tr[n].trim()) state.teamsAr[n] = tr[n].trim();
-}
+// الأسماء بلا عربي ⇐ تُنشر في names/missing.json لنضيفها للقاموس يدوياً (يظهر الاسم الإنجليزي حتى ذلك)
+const missing = [...new Set([...byId.values()].flatMap(m => [m.h.n, m.a.n]).filter(n => !arName(n)))].sort();
+fs.mkdirSync(`${DATA}/names`, { recursive: true });
+fs.writeFileSync(`${DATA}/names/missing.json`, JSON.stringify(missing, null, 0));
+if (fs.existsSync('names/ar.json')) fs.copyFileSync('names/ar.json', `${DATA}/names/ar.json`);
+if (missing.length) log(`📝 ${missing.length} اسم بلا عربي (names/missing.json)`);
 
 // ── 6) إعلانات المباريات (مجلد promos) ────────────────────────────
 const promos = [];
@@ -524,15 +526,14 @@ async function composeKickoff(group) {
       ? { title: `⚽ ${H} × ${A} — مباشر الآن`, body: `${L} — المباراة جارية منذ ${late} دقيقة، الحق بها على TOTV+ 🔥` }
       : { title: `🔔 صافرة البداية! ${H} × ${A}`, body: `${L} — انطلقت المباراة الآن، تابعها مباشرة على TOTV+ ⚽🔥` };
     if (late >= 8) return fallback;
-    const ai = await gemini(
-      'أنت معلّق ومحرر إشعارات لتطبيق بث رياضي عربي اسمه TOTV+. صافرة البداية انطلقت للتو. ' +
-      'اكتب إشعاراً حماسياً قصيراً بروح المعلّق العربي.\n' +
-      `المباراة: ${H} ضد ${A}\nالبطولة: ${L}\nالجولة: ${top.rd}\nالملعب: ${top.venue}\n` +
-      'الشروط: عنوان ≤ 45 حرفاً يبدأ برمز 🔔 أو ⚽ ويذكر الفريقين، ونص ≤ 110 أحرف يدعو للمشاهدة الآن على TOTV+. ' +
-      'ممنوع ذكر أي نتيجة أو أهداف أو ترتيب أو أخبار غير مذكورة هنا. أعد JSON فقط: {"title":"...","body":"..."}');
-    const ok = ai && typeof ai.title === 'string' && typeof ai.body === 'string'
-      && ai.title.length >= 8 && ai.title.length <= 70 && ai.body.length >= 8 && ai.body.length <= 160;
-    return ok ? { title: ai.title.trim(), body: ai.body.trim() } : fallback;
+    // نصوص ثابتة متنوعة (بلا ذكاء اصطناعي) — تتبدل حسب رقم المباراة
+    const T = [
+      { title: `🔔 صافرة البداية! ${H} × ${A}`, body: `${L} — انطلقت المباراة الآن، تابعها مباشرة على TOTV+ ⚽🔥` },
+      { title: `⚽ انطلقت: ${H} × ${A}`, body: `${L}${top.venue ? ` من ${top.venue}` : ''} — شاهد الآن بجودة عالية على TOTV+` },
+      { title: `🔥 ${H} × ${A} الآن!`, body: `${L} — لا تفوّت أي لحظة، البث مباشر على TOTV+ ⚽` },
+      { title: `🔔 بدأت المواجهة: ${H} × ${A}`, body: `${L}${top.rd ? ` · ${top.rd}` : ''} — تابع المباراة مباشرة على TOTV+` },
+    ];
+    return T[Math.abs(Number(top.id) || 0) % T.length];
   }
   const list = group.slice(0, 4).map(m => names(m).join(' × ')).join(' • ');
   return { title: `🔔 صافرة البداية في ${group.length} مباريات!`,
@@ -621,7 +622,7 @@ if (changed) {
   writeJson(`${OUT}/matches.json`, feed);
   writeJson(`${OUT}/state.json`, state);
   writeJson(`${OUT}/status.json`, status);
-  for (const dir of ['logos', 'posters', 'promos', 'catalog']) {
+  for (const dir of ['logos', 'posters', 'promos', 'catalog', 'names']) {
     if (fs.existsSync(`${DATA}/${dir}`)) fs.cpSync(`${DATA}/${dir}`, `${OUT}/${dir}`, { recursive: true });
   }
   // لا ننشر إعلانات منتهية

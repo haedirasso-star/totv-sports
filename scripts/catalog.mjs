@@ -235,6 +235,39 @@ writeJson(`${DIR}/series.json`, serOut);
 writeJson(`${DIR}/cats.json`, cats);
 writeJson(`${DIR}/home.json`, home);
 writeJson(`${DATA}/tmdb_cache.json`, cache);
+
+// ★ بوابة TOTV للآيفون (Xtream API): نفس الفهرس بصيغة player_api جاهزة — العقل المدبر يمررها كما هي
+{
+  const XT = `${DIR}/xt`;
+  fs.rmSync(XT, { recursive: true, force: true });
+  const base = CDN || 'https://cdn.totv.app';
+  const abs = (u) => { u = String(u || ''); return !u ? '' : /^https?:\/\//.test(u) ? u : `${base}/${u.replace(/^\/+/, '')}`; };
+  const names = (list) => new Map(list.map((c) => [String(c.category_id), String(c.category_name || '')]));
+  const ln = names(cats.live), vn = names(cats.movie), sn = names(cats.series);
+  const xtCats = (list) => list.map((c) => ({ category_id: String(c.category_id), category_name: String(c.category_name || ''), parent_id: 0 }));
+  const xl = liveOut.map((x, i) => ({ num: i + 1, name: x.name, stream_type: 'live', stream_id: x.stream_id, stream_icon: abs(x.stream_icon),
+    epg_channel_id: x.epg_channel_id || null, added: '0', category_id: String(x.category_id || ''), category_name: ln.get(String(x.category_id)) || '',
+    custom_sid: '', tv_archive: 0, direct_source: '', tv_archive_duration: 0 }));
+  const xv = vodOut.map((x, i) => ({ num: i + 1, name: x.name, stream_type: 'movie', stream_id: x.stream_id, stream_icon: abs(x.stream_icon),
+    rating: x.rating || '', rating_5based: x.rating_5based || 0, added: String(x.added || '0'), category_id: String(x.category_id || ''),
+    container_extension: x.container_extension || 'mp4', custom_sid: '', direct_source: '' }));
+  const xs = serOut.map((x, i) => ({ num: i + 1, name: x.name, series_id: x.series_id, cover: abs(x.cover), plot: '', cast: '', director: '',
+    genre: x.genre || '', releaseDate: x.releaseDate || '', last_modified: String(x.last_modified || '0'), rating: x.rating || '',
+    rating_5based: x.rating_5based || 0, backdrop_path: [], youtube_trailer: '', episode_run_time: '', category_id: String(x.category_id || '') }));
+  writeJson(`${XT}/cats_live.json`, xtCats(cats.live));
+  writeJson(`${XT}/cats_vod.json`, xtCats(cats.movie));
+  writeJson(`${XT}/cats_series.json`, xtCats(cats.series));
+  writeJson(`${XT}/live.json`, xl);
+  writeJson(`${XT}/vod.json`, xv);
+  writeJson(`${XT}/series.json`, xs);
+  const byCat = (list, pre) => {
+    const g = new Map();
+    for (const x of list) { if (!g.has(x.category_id)) g.set(x.category_id, []); g.get(x.category_id).push(x); }
+    for (const [c, arr] of g) if (/^[0-9A-Za-z_-]+$/.test(c)) writeJson(`${XT}/c/${pre}_${c}.json`, arr);
+    return g.size;
+  };
+  log(`بوابة الآيفون: أقسام ${byCat(xl, 'live')}+${byCat(xv, 'vod')}+${byCat(xs, 'series')}`);
+}
 const ver = {};
 for (const f of ['movies', 'series', 'live', 'cats', 'art', 'home']) {
   ver[f] = crypto.createHash('sha1').update(fs.readFileSync(`${DIR}/${f}.json`)).digest('hex').slice(0, 10);

@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '*/5 * * * *'        # كل 5 دقائق — أغلب التشغيلات لا تستهلك أي طلب
   repository_dispatch:
-    types: [catalog-refresh]       # ★ بعد أن يرفع هاتف الإدارة قوائم السيرفر ⇐ خلفيات TMDB + صور
+    types: [catalog-refresh, feed-tick]   # ★ feed-tick: من خادمنا كل 10 دقائق (جدولة GitHub تتأخر ساعات)       # ★ بعد أن يرفع هاتف الإدارة قوائم السيرفر ⇐ خلفيات TMDB + صور
   workflow_dispatch:
     inputs:
       test_notify:
@@ -57,7 +57,7 @@ jobs:
           XTREAM_USER:   ${{ secrets.XTREAM_USER }}
           XTREAM_PASS:   ${{ secrets.XTREAM_PASS }}
           TMDB_KEY:      ${{ secrets.TMDB_KEY }}
-          CATALOG_FORCE: ${{ inputs.refresh_catalog || github.event_name == 'repository_dispatch' }}
+          CATALOG_FORCE: ${{ inputs.refresh_catalog || github.event.action == 'catalog-refresh' }}
           CDN_BASE:      ${{ vars.CDN_BASE || 'https://cdn.totv.app' }}
 
       - id: run

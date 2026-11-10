@@ -87,6 +87,110 @@
       "order": 3,
       "color": "#5B1F8A",
       "espn": "afc.champions"
+    },
+    {
+      "id": 5,
+      "ar": "دوري الأمم الأوروبية",
+      "weight": 7,
+      "order": 9,
+      "color": "#0E2B5C",
+      "espn": "uefa.nations"
+    },
+    {
+      "id": 10,
+      "ar": "مباريات ودية دولية",
+      "weight": 4,
+      "order": 10,
+      "color": "#5B6470",
+      "espn": "fifa.friendly"
+    },
+    {
+      "id": 3,
+      "ar": "الدوري الأوروبي",
+      "weight": 7,
+      "order": 11,
+      "color": "#F26B00",
+      "espn": "uefa.europa"
+    },
+    {
+      "id": 848,
+      "ar": "دوري المؤتمر الأوروبي",
+      "weight": 5,
+      "order": 12,
+      "color": "#1B9E5A",
+      "espn": "uefa.europa.conf"
+    },
+    {
+      "id": 15,
+      "ar": "كأس العالم للأندية",
+      "weight": 9,
+      "order": 13,
+      "color": "#B8860B",
+      "espn": "fifa.cwc"
+    },
+    {
+      "id": 531,
+      "ar": "كأس السوبر الأوروبي",
+      "weight": 7,
+      "order": 14,
+      "color": "#0B1F63",
+      "espn": "uefa.super_cup"
+    },
+    {
+      "id": 45,
+      "ar": "كأس الاتحاد الإنجليزي",
+      "weight": 6,
+      "order": 15,
+      "color": "#C8102E",
+      "espn": "eng.fa"
+    },
+    {
+      "id": 48,
+      "ar": "كأس الرابطة الإنجليزية",
+      "weight": 5,
+      "order": 16,
+      "color": "#00A650",
+      "espn": "eng.league_cup"
+    },
+    {
+      "id": 143,
+      "ar": "كأس ملك إسبانيا",
+      "weight": 6,
+      "order": 17,
+      "color": "#AA151B",
+      "espn": "esp.copa_del_rey"
+    },
+    {
+      "id": 137,
+      "ar": "كأس إيطاليا",
+      "weight": 5,
+      "order": 18,
+      "color": "#008C45",
+      "espn": "ita.coppa_italia"
+    },
+    {
+      "id": 81,
+      "ar": "كأس ألمانيا",
+      "weight": 5,
+      "order": 19,
+      "color": "#DD0000",
+      "espn": "ger.dfb_pokal"
+    },
+    {
+      "id": 66,
+      "ar": "كأس فرنسا",
+      "weight": 5,
+      "order": 20,
+      "color": "#0055A4",
+      "espn": "fra.coupe_de_france"
+    },
+    {
+      "id": 504,
+      "ar": "كأس الملك السعودي",
+      "weight": 6,
+      "order": 21,
+      "color": "#006C35",
+      "espn": "ksa.kings.cup"
     }
   ],
   "bigTeams": [

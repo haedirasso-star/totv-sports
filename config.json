@@ -142,7 +142,8 @@
       "weight": 6,
       "order": 15,
       "color": "#C8102E",
-      "espn": "eng.fa"
+      "espn": "eng.fa",
+      "cup": true
     },
     {
       "id": 48,
@@ -150,7 +151,8 @@
       "weight": 5,
       "order": 16,
       "color": "#00A650",
-      "espn": "eng.league_cup"
+      "espn": "eng.league_cup",
+      "cup": true
     },
     {
       "id": 143,
@@ -158,7 +160,8 @@
       "weight": 6,
       "order": 17,
       "color": "#AA151B",
-      "espn": "esp.copa_del_rey"
+      "espn": "esp.copa_del_rey",
+      "cup": true
     },
     {
       "id": 137,
@@ -166,7 +169,8 @@
       "weight": 5,
       "order": 18,
       "color": "#008C45",
-      "espn": "ita.coppa_italia"
+      "espn": "ita.coppa_italia",
+      "cup": true
     },
     {
       "id": 81,
@@ -174,7 +178,8 @@
       "weight": 5,
       "order": 19,
       "color": "#DD0000",
-      "espn": "ger.dfb_pokal"
+      "espn": "ger.dfb_pokal",
+      "cup": true
     },
     {
       "id": 66,
@@ -182,7 +187,8 @@
       "weight": 5,
       "order": 20,
       "color": "#0055A4",
-      "espn": "fra.coupe_de_france"
+      "espn": "fra.coupe_de_france",
+      "cup": true
     },
     {
       "id": 504,
@@ -190,7 +196,8 @@
       "weight": 6,
       "order": 21,
       "color": "#006C35",
-      "espn": "ksa.kings.cup"
+      "espn": "ksa.kings.cup",
+      "cup": true
     }
   ],
   "bigTeams": [

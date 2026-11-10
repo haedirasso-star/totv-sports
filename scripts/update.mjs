@@ -191,6 +191,8 @@ if (espnSlug.size && !MOCK && (apiDead || !apiFresh)) {
     const c = ev.competitions?.[0]; if (!c) return null;
     const H = c.competitors?.find(x => x.homeAway === 'home'), A = c.competitors?.find(x => x.homeAway === 'away');
     if (!H || !A) return null;
+    // ★ الكؤوس المحلية: لا نعرض مباريات أندية الدرجات الدنيا (بلا شعار رسمي في ESPN) — نبقي ما فيه نادٍ معروف
+    if (LEAGUES.get(lg)?.cup && !H.team?.logo && !A.team?.logo) return null;
     const st = espnState(c.status || ev.status);
     const side = x => ({ id: 10000000 + Number(x.team.id), n: x.team.displayName || x.team.name,
       src: x.team.logo || `https://a.espncdn.com/i/teamlogos/soccer/500/${x.team.id}.png` });

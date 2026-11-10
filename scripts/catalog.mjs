@@ -109,7 +109,7 @@ const clean = (n) => String(n || '')
   .replace(/\s+/g, ' ').trim();
 const yearOf = (n) => (String(n).match(/\((19|20)\d{2}\)/) || [''])[0].replace(/\D/g, '');
 async function tmdb(kind, name) {
-  const key = `${kind}:${name}`;
+  const key = `v2:${kind}:${name}`;   // v2: مطابقة العنوان (القديم كان يأخذ أول نتيجة ⇐ صور لأعمال أخرى)
   if (cache[key] !== undefined) return cache[key];
   const y = yearOf(name);
   const q = clean(name).replace(/\((19|20)\d{2}\)/, '').trim();
@@ -120,7 +120,12 @@ async function tmdb(kind, name) {
     const r = await fetch(u);
     if (!r.ok) return null;                        // لا نخزّن الأخطاء المؤقتة
     const j = await r.json();
-    const h = (j.results || [])[0];
+    // ★ نقبل فقط نتيجة عنوانها يطابق اسمنا (عربي/أصلي) — وإلا لا صورة أفضل من صورة خاطئة
+    const nz = (x) => String(x || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f\u064B-\u0652\u0640]/g, '')
+      .replace(/[أإآٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[^0-9a-z\u0621-\u064A]+/g, ' ').trim();
+    const want = nz(q);
+    const ok = (r) => [r.title, r.name, r.original_title, r.original_name].map(nz).some((t) => t && (t === want || t.includes(want) || want.includes(t)));
+    const h = (j.results || []).find(ok) || null;
     cache[key] = h ? { bd: h.backdrop_path || '', ps: h.poster_path || '', tid: h.id, ov: (h.overview || '').slice(0, 220) } : null;
   } catch { return null; }
   return cache[key];
